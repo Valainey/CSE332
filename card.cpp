@@ -201,7 +201,7 @@ Card::HandRank rankHand(const vector<Card> &cards) {
 	if (flush) return Card::FLUSH;
 	if (straight) return Card::STRAIGHT;
 	if (three[0]||three[1]||three[2]) return Card::THREE_OF_A_KIND;	
-	if ((pair[0] && pair[2]) || (pair[1] && pair[3])) return Card::TWO_PAIRS;
+	if ((pair[0] && pair[2]) || (pair[1] && pair[3]) || (pair[0] && pair[3])) return Card::TWO_PAIRS;
 	if (pair[0] || pair[1] || pair[2] || pair[3]) return Card::ONE_PAIR;
 	return Card::NO_RANK;
 }

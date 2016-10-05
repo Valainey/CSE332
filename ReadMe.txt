@@ -24,7 +24,7 @@ I also modified the following items:
 
 For more information, please see comments in the .h and .cpp files.
 
-The program is built and executed successfully, outputting as expected. Some trial results are appended as the end of this file.
+The program is built and executed successfully, outputting as expected. Some trial results are appended at the end of this file.
 
 =======================================
 Extra Credit

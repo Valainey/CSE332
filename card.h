@@ -1,6 +1,6 @@
 /*
 card.h created by Cindy Le (lex@wustl.edu)
-Read from an input .txt file and parse them into a vector that represents a card deck.
+card includes all functions dealing with card and deck.
 */
 
 #pragma once
@@ -9,39 +9,45 @@ Read from an input .txt file and parse them into a vector that represents a card
 #define CARDS_H_
 
 #include "stdafx.h"
+#include "lab.h"
 #include <vector>
 #include <string>
 #include <iostream>
+#include <functional>
+#include <algorithm>
 
 using namespace std;
 
-const vector<string> handRankName{ "No Rank", "Straight Flush", "Four of a Kind","Full House", "Flush", "Straight",
-"Three of a Kind","Two Pairs", "One Pair" };
+const vector<string> handRankName{ "No Rank", "One Pair", "Two Pairs", "Three of a Kind", "Straight", "Flush", "Full House", "Four of a Kind", "Straight Flush"};
 const vector<string> rankName{ "2","3","4","5","6","7","8","9","10","j","q","k","a" };
 const vector<string> suitName{ "C","D","H","S" };
 
+enum CardSuit { NO_SUCH_SUIT, CLUBS, DIAMONDS, HEARTS, SPADES };
+enum CardRank { NO_SUCH_RANK, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, J, Q, K, A};
+enum HandRank { NO_RANK, ONE_PAIR, TWO_PAIRS, THREE_OF_A_KIND, STRAIGHT, FLUSH, FULL_HOUSE, FOUR_OF_A_KIND, STRAIGHT_FLUSH};
+	
+
 //struct(s)
 struct Card {
-	enum CardSuit { NO_SUCH_SUIT, CLUBS, DIAMONDS, HEARTS, SPADES };
-	enum CardRank { NO_SUCH_RANK, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, J, Q, K, A};
-	enum HandRank { NO_RANK, STRAIGHT_FLUSH, FOUR_OF_A_KIND, FULL_HOUSE, FLUSH, STRAIGHT, THREE_OF_A_KIND, TWO_PAIRS, ONE_PAIR};
-	
 	CardSuit suit;
 	CardRank rank;
+
+	bool operator<(const Card& c) const{
+		//compares first by rank then suit
+		return rank * 4 + suit < c.rank * 4 + c.suit; 
+	}
 };
 
 //functions
-int usageMsg(char* filename);
-int parseDeck(std::vector<Card> &card, char *filename);
-int printVector(const std::vector<Card> &cards);
-int sortDeck(std::vector<Card> &cards);
-int printRank(std::vector<Card> &cards);
-bool operator<(const Card&, const Card&);
+int parseDeck(vector<Card> &card, char *filename);
+int printVector(const vector<Card> &cards);
+int sortDeck(vector<Card> &cards);
+int printRank(const vector<Card> &cards);
 
-Card::CardSuit convertSuit(const char& input);
-Card::CardRank convertRank(const char& input);
-Card::HandRank rankHand(const vector<Card> &cards);
-
+CardSuit convertSuit(const char& input);
+CardRank convertRank(const char& input);
+int hashHand(const vector<Card> &cards);
+int swap(Card& a, Card& b);
 
 
 #endif //CARDS_H_

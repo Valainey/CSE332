@@ -1,151 +1,270 @@
-CSE 332 Lab 1: Cards, Hands, and Scores
---------------------------------------
+CSE 332 Lab 2: Card Decks and Hands
+-------------------------------------
 Name: Cindy Le 
 Student ID: 443231
 Email: lex@wustl.edu
-======================================
-Error Code (from Lab 0)
-0: successful run.
-1: fail to open the input file. The input file should be saved under the same directory.
-2: wrong number of arguments. The program should read in exact one argument which is the input file name.
-======================================
-In this lab, I defined the following items:
-	vector handRankName stores names of hand ranks.
-	sortDeck sorts every five cards in asending order.
-	hashHand finds rank for a hand, and returns a hash value for it.
-	printRank judges and prints rank for every five cards.
-	operator< compares two cards first by rank and suit.
+=====================================
 
-I also modified the following items:
-	main will rank and sort a deck after it finishes parsing.
-	parceDeck now only allows five valid cards per line, and gives warning to invalid input.
-	convertRank is slightly different than the previous version when dealing with "10".
-	vector rankName and suitName are moved from .cpp to .h file.
+In this lab I wrote two new classes, Hand and Deck.
+
+The main function reads an input file and deal the cards to nine hands.
 
 For more information, please see comments in the .h and .cpp files.
 
-The program is built and executed successfully, outputting as expected without any errors or warnings. 
+-------------------------------------
 
+While building the file, I got the following errors:
+
+C2065 'Card': undeclared identifier
+C3646 'popCard': unknown override specifier
+C2059 syntax error: '('
+C2238 unexpected token(s) preceding
+Caused by improper inclusion of head file 'card.h'
+Fixed by renaming and including 'Card.h'
+
+C2061 syntax error: identifier 'Deck'
+C2805 binary 'operator<<' has too few parameters
+C2678 no operator found which takes a left-hand operand of type 'Hand'
+Caused by circular dependency of Deck.cpp and Hand.cpp
+Fixed by adding class keywords in both files above according to
+http://stackoverflow.com/questions/15715882/error-c2061-syntax-error-identifier
+
+C4996 'std::copy_Unchecked_iterators::_Deprecate': Call to 'std::copy' with parameters that may be unsafe
+C2794 'iterator_category': is nota member of any direct or indirect base class of 'std::iterator_traits<_OutIt>'
+C2938 '_Iter_cat_t<std::vector<Card,std::allocator<_Ty>>>': Failed to specialize alias template
+C2062 type 'unknown-type' unexpected
+Caused by improper inclusion of STL library
+Fixed by including <iterator> in Deck.h for std::copy() according to
+https://github.com/erengy/anitomy/issues/2
+
+C4244 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+Caused by "srand(time(0))" trying to cast 64-bit int to 32-bit int
+Fixed by changing to "srand((unsigned int)time(0))" according to
+http://stackoverflow.com/questions/9246536/warning-c4244-argument-conversion-from-time-t-to-unsigned-int-possible
+
+--------------------------------------
+
+Once built successfully, I got the following errors:
+
+Failed to detect NO_CMD_ARG error.
+Caused by wrong type of error code in definition.
+Fixed by modifying the try-catch block, changing "catch(int errorCode)" to "catch(ProgramError errorCode)"
+
+---------------------------------------
+
+Then the program runs and outputs as expected without errors or warnings. 
 Some trial results are appended at the end of this file. 
-To illustrate more clearly, the program also prints out deck information after sorting the cards. 
+
+=======================================
+Error Code
+
+0 Successful run. 
+1 Fail to open the input file. 
+2 There are less than 45 cards in the input file. 
+3 Command line contains no input file name. 
+4 Two command line arguments are given but neither one contains shuffle keyword. 
+5 No command line arguments are given. 
+6 More than two command line arguments are given.
+7 More than five cards are in the hand.
+8 The deck has nothing to pop up. 
 
 =======================================
 Extra Credit
-In order to sort hands by their ranks, I wrote a hash function where
-	1) the highest digit represents a hand's rank, and
-	2) the other six digits is a base-13 number representing ranks of five cards.
 
-Such arrangement ensures a hand that should be placed earlier has a larger hash value. 
-Then all hands can be sorted all at once by their hash values.
+In this lab I closely followed the following programming guidelines:
 
-To avoid more complex structs for hands to be involved, this sorting is naively implemented with bubble sort.
-The main part still uses STL sorting algorithm using the operator defined for comparing cards.
+A.8-A.9 (exceptions)
+My program only throws expections when a problem is detected, while it returns zero for a succesful run.
+In the main function I had a block that included every line where an expection may occur.
+I corrected the error type so it would caught any exceptions during run time.
 
-The second trial below illustrates how the program responds to hands having same ranks.
+A.12-A.15 (pointers and arrays)
+I used stringstream type to handle strings, which had internal string buffers that would improve running time.
+I did not use a pointer or a fixed-length array while I adopted vector<Card> as my choice of container.
+My program always checks a container's size before pointing to an index.
+For example, my program checks whether a hand contains five cards before calculating its rank.
+
+A.16 (debugging)
+I debugged the program with careful observations and effective attempts to gether useful runtime information.
+I tested my program with a wide range of inputs that differ in various aspects (see them at the end).
+
+B.10-B.12 (constructors)
+I wrote a separate head file for each .cpp file I had, with class initializations before data member ones.
+I strictly followed the instructions of what to define and to declare, with suggested parameters.
+My constructors are safe to use after careful pre-requisite checks.
+
+B.18 (copy constructor and assignment operator)
+Instances of Card, Hand and Deck are allowed to be copied, so I did not add further codes for them.
+
+B.31 first part (inclusion guards)
+I wrote the "inclusion guard" construct for every head file I created.
+
 
 =======================================
 Trial Results
 
 Input 1:
-KD JD 6s 5s 3c // no rank (king high)
-6H // not a hand (too few)
-Qs QH	 JH Qc Jc // full house
-6c 10s 9H  8s  7H // straight
-AH Ks Js AD Ac // three of a kind
-9D  6D 5D 8D 7D // straight flush
-7s 8c 2s 5H 2c // one pair    
-Kc 3s 3D 2D 7c 5c  // not a hand (too many)
-4s 4H  4D As 4c  // four of a kind
-KH   10H 3H 2H 8H // flush
-9c QD 10c 10D 9s // two pairs
+Card.exe
 
 Output 1:
-Invalid line detected: 6H // not a hand (too few)
-Invalid line detected: Kc 3s 3D 2D 7c 5c  // not a hand (too many)
-The current deck has 45 cards: 
-5D  6D  7D  8D  9D  
-4C  4D  4H  4S  aS  
-jC  jH  qC  qH  qS  
-2H  3H  8H  10H  kH  
-6C  7H  8S  9H  10S  
-jS  kS  aC  aD  aH  
-9C  9S  10C  10D  qD  
-2C  2S  5H  7S  8C  
-3C  5S  6S  jD  kD  
-Card 1 to 5: Straight Flush; 
-Card 6 to 10: Four of a Kind; 
-Card 11 to 15: Full House; 
-Card 16 to 20: Flush; 
-Card 21 to 25: Straight; 
-Card 26 to 30: Three of a Kind; 
-Card 31 to 35: Two Pairs; 
-Card 36 to 40: One Pair; 
-Card 41 to 45: No Rank; 
+Program's name: Card.exe
+Error 5: No command line arguments are given. 
 
 Input 2:
-3c 3c 3c 4c 4d //full house
-6c 6h 7c 10d 10c //one pair
-2c 2d 2c 5c 7c //three of a kind
-3c 5c 7c 8c 10c //flush
-3c 5h 6c 7h jc //no rank
-4c 5c 6c 7c 8c //straight flush
-8c 8c 8c 8d 9c //four of a kind
-5c 5d 7c 7c 7c //full house
-2c 2d 5c 9h 9h //two pairs
-3c 4c 7c 10d 10c //one pair
-2c 4h 5c 7h 9c //no rank
-4c 6c 6d 6c 8c //three of a kind
-2h 3c 4h 5c 6h //straight
-3c 6c 6c 6d 6c //four of a kind
-2c 5d 5c 9h 9h //two pairs
-3c 4c 5c 6c 7c //straight flush
-2c 4c 5c 7c 9c //flush
-2c 2d 5c 5h 9h //two pairs
-4h 5c 6h 7c 8h //straight
-3c 3c 7c 8d 10c //one pair
-5c 6c 7d 7c 7c //three of a kind
+Card.exe -shuffle
 
 Output 2:
-The current deck has 105 cards: 
-4C  5C  6C  7C  8C  
-3C  4C  5C  6C  7C  
-8C  8C  8C  8D  9C  
-3C  6C  6C  6C  6D  
-5C  5D  7C  7C  7C  
-3C  3C  3C  4C  4D  
-3C  5C  7C  8C  10C  
-2C  4C  5C  7C  9C  
-4H  5C  6H  7C  8H  
-2H  3C  4H  5C  6H  
-5C  6C  7C  7C  7D  
-4C  6C  6C  6D  8C  
-2C  2C  2D  5C  7C  
-6C  6H  7C  10C  10D  
-2C  5C  5D  9H  9H  
-2C  2D  5C  9H  9H  
-2C  2D  5C  5H  9H  
-3C  4C  7C  10C  10D  
-3C  3C  7C  8D  10C  
-3C  5H  6C  7H  jC  
-2C  4H  5C  7H  9C  
-Card 1 to 5: Straight Flush; 
-Card 6 to 10: Straight Flush; 
-Card 11 to 15: Four of a Kind; 
-Card 16 to 20: Four of a Kind; 
-Card 21 to 25: Full House; 
-Card 26 to 30: Full House; 
-Card 31 to 35: Flush; 
-Card 36 to 40: Flush; 
-Card 41 to 45: Straight; 
-Card 46 to 50: Straight; 
-Card 51 to 55: Three of a Kind; 
-Card 56 to 60: Three of a Kind; 
-Card 61 to 65: Three of a Kind; 
-Card 66 to 70: Two Pairs; 
-Card 71 to 75: Two Pairs; 
-Card 76 to 80: Two Pairs; 
-Card 81 to 85: Two Pairs; 
-Card 86 to 90: One Pair; 
-Card 91 to 95: One Pair; 
-Card 96 to 100: No Rank; 
-Card 101 to 105: No Rank; 
+Program's name: Card.exe
+Error 3: Command line contains no input file name. 
+
+Input 3:
+Card.exe -shuffle -shuffle
+
+Output 3:
+Program's name: Card.exe
+Error 3: Command line contains no input file name. 
+
+Input 4:
+Card.exe nonexist.txt
+
+Output 4:
+Program's name: Card.exe
+Error 1: Fail to open the input file. 
+
+Input 5:
+Card.exe a b c
+
+Output 5:
+Program's name: Card.exe
+Error 6: More than two command line arguments are given. 
+
+Input 6:
+Card.exe card.txt
+
+KD Qs 6c AH 9D 7s 4s KH 9c
+JD QH 10s Ks 6D 8c 4H 10H QD
+
+Output 6:
+Program's name: Card.exe
+Error 2: There are less than 45 cards in the input file. 
+
+Input 7:
+Card.exe card.txt
+
+KD Qs 6c AH 9D 7s 4s KH 9c
+JD QH 10s Ks 6D 8c 4H 10H QD
+6s JH 9H Js 5D 2s 4D 3H 10c
+5s Qc 8s AD 8D 5H As 2H 10D
+3c Js 7H Ac 7D 2c 4c 8H 9s
+
+Output 7:
+The deck is empty. 
+Hands before sorting
+9C  9S  10C  10D  qD     (Two Pairs)
+2H  3H  8H  10H  kH     (Flush)
+4C  4D  4H  4S  aS     (Four of a Kind)
+2C  2S  5H  7S  8C     (One Pair)
+5D  6D  7D  8D  9D     (Straight Flush)
+jS  kS  aC  aD  aH     (Three of a Kind)
+6C  7H  8S  9H  10S     (Straight)
+jH  jS  qC  qH  qS     (Full House)
+3C  5S  6S  jD  kD     (No Rank)
+Hands after sorting - card order
+2C  2S  5H  7S  8C     (One Pair)
+2H  3H  8H  10H  kH     (Flush)
+3C  5S  6S  jD  kD     (No Rank)
+4C  4D  4H  4S  aS     (Four of a Kind)
+5D  6D  7D  8D  9D     (Straight Flush)
+6C  7H  8S  9H  10S     (Straight)
+9C  9S  10C  10D  qD     (Two Pairs)
+jH  jS  qC  qH  qS     (Full House)
+jS  kS  aC  aD  aH     (Three of a Kind)
+Hands after sorting - poker rank
+5D  6D  7D  8D  9D     (Straight Flush)
+4C  4D  4H  4S  aS     (Four of a Kind)
+jH  jS  qC  qH  qS     (Full House)
+2H  3H  8H  10H  kH     (Flush)
+6C  7H  8S  9H  10S     (Straight)
+jS  kS  aC  aD  aH     (Three of a Kind)
+9C  9S  10C  10D  qD     (Two Pairs)
+2C  2S  5H  7S  8C     (One Pair)
+3C  5S  6S  jD  kD     (No Rank)
+
+Input 8:
+Card.exe card.txt -shuffle
+(same input file as Input 7)
+
+The deck is empty. 
+Hands before sorting
+3H  4S  7H  qH  aS     (No Rank)
+5S  7D  10S  qD  kS     (No Rank)
+5D  8C  8H  8S  aD     (Three of a Kind)
+3C  4D  5H  9D  10C     (No Rank)
+6C  6D  6S  jD  jS     (Full House)
+7S  9S  jH  qC  qS     (One Pair)
+2S  4H  10H  kH  aH     (No Rank)
+4C  8D  9H  jS  kD     (No Rank)
+2C  2H  9C  10D  aC     (One Pair)
+Hands after sorting - card order
+2C  2H  9C  10D  aC     (One Pair)
+2S  4H  10H  kH  aH     (No Rank)
+3C  4D  5H  9D  10C     (No Rank)
+3H  4S  7H  qH  aS     (No Rank)
+4C  8D  9H  jS  kD     (No Rank)
+5S  7D  10S  qD  kS     (No Rank)
+5D  8C  8H  8S  aD     (Three of a Kind)
+6C  6D  6S  jD  jS     (Full House)
+7S  9S  jH  qC  qS     (One Pair)
+Hands after sorting - poker rank
+6C  6D  6S  jD  jS     (Full House)
+5D  8C  8H  8S  aD     (Three of a Kind)
+7S  9S  jH  qC  qS     (One Pair)
+2C  2H  9C  10D  aC     (One Pair)
+2S  4H  10H  kH  aH     (No Rank)
+3H  4S  7H  qH  aS     (No Rank)
+5S  7D  10S  qD  kS     (No Rank)
+4C  8D  9H  jS  kD     (No Rank)
+3C  4D  5H  9D  10C     (No Rank)
+
+Input 9:
+Card.exe card.txt -shuffle
+
+as 2s 3s 4s 5s 6s 7s 8s 9s 10s js qs ks
+ad 2d 3d 4d 5d 6d 7d 8d 9d 10d jd qd kd
+ah 2h 3h 4h 5h 6h 7h 8h 9h 10h jh qh kh
+ac 2c 3c 4c 5c 6c 7c 8c 9c 10c jc qc kc
+
+Output 9:
+The deck has 7 cards: 
+3C  aS  4S  2S  aD  
+aH  2D  
+Hands before sorting
+4H  5C  5H  9D  10D     (One Pair)
+3D  5S  7H  jH  qD     (No Rank)
+3S  8C  10S  qS  kC     (No Rank)
+3H  6C  6H  6S  7D     (Three of a Kind)
+4D  8H  8S  jD  qC     (One Pair)
+4C  6D  8D  10C  qH     (No Rank)
+9C  9H  9S  10H  aC     (Three of a Kind)
+7C  7S  jS  kD  kH     (Two Pairs)
+2C  2H  5D  jC  kS     (One Pair)
+Hands after sorting - card order
+2C  2H  5D  jC  kS     (One Pair)
+3D  5S  7H  jH  qD     (No Rank)
+3H  6C  6H  6S  7D     (Three of a Kind)
+3S  8C  10S  qS  kC     (No Rank)
+4H  5C  5H  9D  10D     (One Pair)
+4C  6D  8D  10C  qH     (No Rank)
+4D  8H  8S  jD  qC     (One Pair)
+7C  7S  jS  kD  kH     (Two Pairs)
+9C  9H  9S  10H  aC     (Three of a Kind)
+Hands after sorting - poker rank
+9C  9H  9S  10H  aC     (Three of a Kind)
+3H  6C  6H  6S  7D     (Three of a Kind)
+7C  7S  jS  kD  kH     (Two Pairs)
+4D  8H  8S  jD  qC     (One Pair)
+4H  5C  5H  9D  10D     (One Pair)
+2C  2H  5D  jC  kS     (One Pair)
+3S  8C  10S  qS  kC     (No Rank)
+3D  5S  7H  jH  qD     (No Rank)
+4C  6D  8D  10C  qH     (No Rank)

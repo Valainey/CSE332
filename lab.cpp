@@ -87,15 +87,10 @@ int main(int argc, char* argv[])
 		}
 	}
 	catch (ProgramError errorCode) {
-		usageMsg(filename, errorCode);
+		return usageMsg(filename, errorCode);
 	}
 
 	return 0;
 }
-
-bool cmdOptionExists(char** begin, char** end, const string& option) {
-	return find(begin, end, option) != end;
-}
-
 
 

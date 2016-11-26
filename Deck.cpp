@@ -1,5 +1,5 @@
 /*
-Deck.cpp created by Cindy Le (lex@wustl.edu)
+Deck.cpp created by Cindy Le, Adrien Xie, and Yanni Yang
 */
 
 #include "stdafx.h"
@@ -8,9 +8,9 @@ Deck.cpp created by Cindy Le (lex@wustl.edu)
 
 using namespace std;
 
-//A constructor that takes a file name and passes it into a call to the load method .
-Deck::Deck(const char* &filename) {
-	load(filename);
+//A constructor.
+Deck::Deck() {
+	cards = vector<Card>();
 }
 
 //A destructor: the compiler-supplied destructor is sufficient.
@@ -31,94 +31,9 @@ Card Deck::popCard() {
 	return c;
 }
 
-//A "load" method that reads in valid card definition strings from the file.
-int Deck::load(const char* &filename) {
-	ifstream ifs(filename);
-	if (ifs.is_open()) {
-		string line(""); //to store content of each input line without '\n'.
-		while (getline(ifs, line)) {
-			vector<Card> temp = vector<Card>();
-			int llen = line.length();
-
-			int pos = 0; //state that takes value of 0, 1, 2, 3, 100. See explanations later in code.
-			bool ifCardFinished = false;
-			bool ifCardValid = true;
-			bool ifLineFinished = false;
-			bool ifLineValid = true;
-
-			CardRank rank;
-			CardSuit suit;
-
-			for (int i = 0; i < llen; i++) {
-				char& currentChar = line[i];
-				switch (pos) {
-				case 0: //nothing read yet; expect either a space or a '/' or a rank.
-
-					rank = convertRank(currentChar);
-					if (rank == NO_SUCH_RANK) {//is a space or a '/'
-						if (currentChar == '/') pos = 100;
-						//else do nothing, pos still be 0
-					}
-					else if (rank == TEN) pos++;
-					else pos = 2;
-					break;
-				case 1: //have read a '1'; expect a '0'.
-					if (currentChar != '0') ifCardValid = false;
-					else pos++;
-					break;
-				case 2: //have read rank; expect a suit.
-					suit = convertSuit(currentChar);
-					if (suit == NO_SUCH_SUIT) ifCardValid = false;
-					if (i == llen - 1) {
-						ifCardFinished = true;
-						ifLineFinished = true;
-					}
-					else pos++;
-					break;
-				case 3: //have read rank and suit; expect a space or a '/'.
-					if ((currentChar >= '0' && currentChar <= '9') || (currentChar >= 'a' && line[i] <= 'z') || (currentChar >= 'A' && currentChar <= 'Z'))
-						ifCardValid = false;
-					else if (currentChar == '/') pos = 100;
-					else {
-						ifCardFinished = true;
-						pos = 0;
-					}
-					break;
-				case 100: //have read a '/'; expect another '/', or the line is invalid.
-					if (currentChar == '/') ifLineFinished = true;
-					else pos=0;
-				} //end switch
-
-				if (!ifCardValid) ifLineValid = false;
-				else if (ifCardFinished) {
-					Card c = { suit, rank };
-					temp.push_back(c);
-					ifCardFinished = false;
-				}
-
-				if (ifLineFinished || !ifLineValid) break;
-
-			}//end for
-
-			if (!ifLineValid) cout << "Invalid line detected: " << line << endl;
-			else {//push the teporarily stored cards
-				int l = temp.size();
-				for (int i = 0; i < l; i++) cards.push_back(temp[i]);
-			}//end if
-
-		}//end while getline
-
-		ifs.close();
-	}
-	else { //ifs.is_open==False
-		throw(FAIL_OPENING_FILE);
-	}
-
-	if (cards.size()<45) {
-		throw(TOO_FEW_CARDS);
-	}
-
-	return 0;
+//An add_card method that takes a card as its only parameter, and adds it to the deck.
+void Deck::addCard(Card& c) {
+	cards.push_back(c);
 }
 
 //A "shuffle" method that randomizes the order of all the cards.
@@ -181,6 +96,20 @@ CardRank Deck::convertRank(const char& input) {
 	case 'K': case 'k': return K;
 	default: return NO_SUCH_RANK;
 	}
+}
+
+//A function that fills the deck with standard 52 cards.
+void Deck::standardized() {
+	cards = vector<Card>();
+	for (int i = 1; i < 5; i++) {
+		for (int j = 1; j < 14; j++) {
+			CardSuit suit = static_cast<CardSuit>(i);
+			CardRank rank = static_cast<CardRank>(j);
+			Card c = { suit, rank };
+			addCard(c);
+		}
+	}
+	shuffle();
 }
 
 

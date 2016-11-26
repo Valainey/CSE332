@@ -1,54 +1,62 @@
-CSE 332 Lab 2: Card Decks and Hands
+CSE 332 Lab 3: Game: Five Card Draw
 -------------------------------------
-Name: Cindy Le 
-Student ID: 443231
-Email: lex@wustl.edu
+Team members: Cindy Le, Yanni Yang and Adrien Xie
+443231 - lex@wustl.edu
 =====================================
 
-In this lab I wrote two new classes, Hand and Deck.
+In this lab we extended previous lab classes and implemented new struct 
+Player and two new classes Game and FiveCardDraw. We also rewrote most 
+of the main function in lab.cpp.
 
-The main function reads an input file and deal the cards to nine hands.
+The main function initializes an instance of the FiveCardDraw and starts
+the game with player names passed by command line arguments. Then  it keeps 
+running the game until there are less then two players in the current game.
+
+Header/Source Files From lab 2 With Minor Modifications:
+Card.h          Card.cpp
+Deck.h          Deck.cpp
+Hand.h          Hand.cpp
+
+Header/Source Files Newly Created or With Significant Modifications:
+Game.h          Game.cpp
+FiveCardDraw.h  FiveCardDraw.cpp
+lab.h           lab.cpp
 
 For more information, please see comments in the .h and .cpp files.
 
 -------------------------------------
 
-While building the file, I got the following errors:
+While building the file, we got the following errors:
 
-C2065 'Card': undeclared identifier
-C3646 'popCard': unknown override specifier
-C2059 syntax error: '('
-C2238 unexpected token(s) preceding
-Caused by improper inclusion of head file 'card.h'
-Fixed by renaming and including 'Card.h'
+C2440 'initializing': cannot convert from 'int' to 'CardRank'
+C2440 'initializing': cannot convert from 'int' to 'CardRank'
+C2440 'initializing': cannot convert from 'int' to 'CardSuit'
+Caused by int and enum type mismatch.
+Fixed by static cast from int type to enum type. 
 
-C2061 syntax error: identifier 'Deck'
-C2805 binary 'operator<<' has too few parameters
-C2678 no operator found which takes a left-hand operand of type 'Hand'
-Caused by circular dependency of Deck.cpp and Hand.cpp
-Fixed by adding class keywords in both files above according to
-http://stackoverflow.com/questions/15715882/error-c2061-syntax-error-identifier
-
-C4996 'std::copy_Unchecked_iterators::_Deprecate': Call to 'std::copy' with parameters that may be unsafe
-C2794 'iterator_category': is nota member of any direct or indirect base class of 'std::iterator_traits<_OutIt>'
-C2938 '_Iter_cat_t<std::vector<Card,std::allocator<_Ty>>>': Failed to specialize alias template
-C2062 type 'unknown-type' unexpected
-Caused by improper inclusion of STL library
-Fixed by including <iterator> in Deck.h for std::copy() according to
-https://github.com/erengy/anitomy/issues/2
-
-C4244 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-Caused by "srand(time(0))" trying to cast 64-bit int to 32-bit int
-Fixed by changing to "srand((unsigned int)time(0))" according to
-http://stackoverflow.com/questions/9246536/warning-c4244-argument-conversion-from-time-t-to-unsigned-int-possible
+C2504 'Game': base class undefined
+C2039 'instance': is not a member of 'FiveCardDraw'
+C3861 'instance': identifier not found
+C2504 'Game': base class undefined
+C2039 'name': is not a member of 'std::shared+ptr<Player>'
+Caused by circular dependency of Game.h, Game.cpp, FiveCardDraw.h and FiveCardDraw.cpp.
+Fixed by removing duplicate and circular inclusions of the header files.
 
 --------------------------------------
 
-Once built successfully, I got the following errors:
+Once built successfully, we got the following errors:
 
-Failed to detect NO_CMD_ARG error.
-Caused by wrong type of error code in definition.
-Fixed by modifying the try-catch block, changing "catch(int errorCode)" to "catch(ProgramError errorCode)"
+Game already started exception.
+Caused by incorrect check on game condition.
+Fixed the check for game condition.
+
+User input is skipped for the first player at the second round.
+Caused by \n left in cin buffer.
+Fixed by reading until a nonempty line.
+
+Number of cards in the main decreases by ten after each round.
+Caused by dropping the cards from player without adding them back to the discard deck.
+Fixed by adding the removed cards from players to the discard deck.
 
 ---------------------------------------
 
@@ -56,215 +64,261 @@ Then the program runs and outputs as expected without errors or warnings.
 Some trial results are appended at the end of this file. 
 
 =======================================
+NOTES
+
+1. Users should give two or more valid player names as command line arguments.
+
+2. Player names “NO” “No” “nO” “no” either followed or not followed by “*” are not allowed.
+
+3. Player names that consist of merely ‘*’ or have ‘*’ in the middle are not allowed.
+
+4. When indicating whether players leave or join, enter “NO” “No” “nO” “no” for nobody.
+
+5. When reading in the card indices to discard, all integers should be in the same line.
+
+6. User data are stored as local files with three lines that contains name, wins and losses
+respectively. Username is always stored without a ‘*’. 
+
+7. When asking an auto player to leave, input should include a ‘*’ at the end.
+
+=======================================
 Error Code
 
 0 Successful run. 
-1 Fail to open the input file. 
-2 There are less than 45 cards in the input file. 
-3 Command line contains no input file name. 
-4 Two command line arguments are given but neither one contains shuffle keyword. 
-5 No command line arguments are given. 
-6 More than two command line arguments are given.
-7 More than five cards are in the hand.
-8 The deck has nothing to pop up. 
+1 An unknown error has occurred. 
+2 No Sufficient command line arguments are given. 
+3 Too many command line arguments are given. 
+4 More than five cards are in the hand. 
+5 The deck has nothing to pop up. 
+6 Hand's index is out of range.
+7 The hand contains less than five cards.
+8 Instance is not available! 
+9 Game is already started!
+10 Unknown game! 
+11 No game is currently in process! 
+12 The player is already playing! 
+13 The decks have no cards to deal.
 
 =======================================
 Extra Credit
 
-In this lab I closely followed the following programming guidelines:
+We defined a bool variable, isAuto, for every Player instance that takes true if and only if the read-
+in detects a ‘*’ at the end of a new player’s name. 
 
-A.8-A.9 (exceptions)
-My program only throws expections when a problem is detected, while it returns zero for a succesful run.
-In the main function I had a block that included every line where an expection may occur.
-I corrected the error type so it would caught any exceptions during run time.
+At the before_turn phase, the program will decide which cards to discard if the player has a true for 
+isAuto. 
 
-A.12-A.15 (pointers and arrays)
-I used stringstream type to handle strings, which had internal string buffers that would improve running time.
-I did not use a pointer or a fixed-length array while I adopted vector<Card> as my choice of container.
-My program always checks a container's size before pointing to an index.
-For example, my program checks whether a hand contains five cards before calculating its rank.
+At the after_round phase, the program will find all auto players along the list and decide whether to 
+leave for each of them. 
 
-A.16 (debugging)
-I debugged the program with careful observations and effective attempts to gether useful runtime information.
-I tested my program with a wide range of inputs that differ in various aspects (see them at the end).
-
-B.10-B.12 (constructors)
-I wrote a separate head file for each .cpp file I had, with class initializations before data member ones.
-I strictly followed the instructions of what to define and to declare, with suggested parameters.
-My constructors are safe to use after careful pre-requisite checks.
-
-B.18 (copy constructor and assignment operator)
-Instances of Card, Hand and Deck are allowed to be copied, so I did not add further codes for them.
-
-B.31 first part (inclusion guards)
-I wrote the "inclusion guard" construct for every head file I created.
-
+When saving the file, ‘*’ will be simply discarded.
 
 =======================================
 Trial Results
 
-Input 1:
-Card.exe
+Input 1: 
+Command Line Arguments: lab3.exe
 
 Output 1:
-Program's name: Card.exe
-Error 5: No command line arguments are given. 
+Program's name: C:\Users\xie.z_000\documents\visual studio 2015\Projects\lab3.exe\Debug\lab3.exe
+Error 4: No Sufficient command line arguments are giving.
 
-Input 2:
-Card.exe -shuffle
+--------------------------------------
+
+Input 2: 
+Command Line Arguments: lab3.exe * ** no No nO* mid*dle
 
 Output 2:
-Program's name: Card.exe
-Error 3: Command line contains no input file name. 
+Program's name: C:\Users\xie.z_000\documents\visual studio 2015\Projects\lab3.exe\Debug\lab3.exe
+Error 4: No Sufficient command line arguments are giving.
 
-Input 3:
-Card.exe -shuffle -shuffle
+--------------------------------------
+
+Input 3: 
+Command Line Arguments: lab3.exe adrien cindy
 
 Output 3:
-Program's name: Card.exe
-Error 3: Command line contains no input file name. 
+Player adrien has 3D 5D 6S jC jH	<One Pair>
+Card to discard? Enter the indices separated by space in a line.
+1 2 3 45 <- user input
+
+Player cindy has 8S 8S 9H jD qD		<One Pair>
+Card to discard? Enter the indices separated by space in a line.
+3 4 5 12 66 <- user input
+
+Player adrien has 2H 5C 6C jC jH	<One Pair>
+Player cindy has 3S 8D 8S qS kS		<One Pair>
+
+Player adrien has 2H 5C 6C jC jH	<One Pair>
+Player cindy has 3S 8D 8S qS kS		<One Pair>
+
+Any player leaving? Enter 'No' for nobody.
+Players' name:
+no*
+
+Any player joining? Enter 'No' for nobody.
+Player's name:
+nO
+
+Game continues with 2 players.
+
+Player adrien has 10S jD qH kH aS	<Straight>
+Card to discard? Enter the indices separated by space in a line.
+NO <- user input
+
+Player cindy has 3H 6D 10C qC kD	<No Rank>
+Card to discard? Enter the indices separated by space in a line.
+		<- enter
+3 2 4 1 5	<- user input
+
+Player adrien has 10s jD qH kH aS	<Straight>
+Player cindy has 2D 3C 4D kC aH		<No Rank>
+
+Player adrien has 10s jD qH kH aS	<Straight>
+Player cindy has 2D 3C 4D kC aH		<No Rank>
+
+Any player leaving? Enter 'No' for nobody.
+Player's name:
+yanni <- user input
+The player yanni is not currently playing!
+
+Any player leaving? Enter 'No' for nobody.
+nO* <- user input
+
+Any player joining? Enter 'No' for nobody.
+Players name:
+ano <- user input
+
+Any player joining? Enter 'No' for nobody.
+Players name:
+no <- user input
+
+Game continues with 3 players.
+
+Player adrien has 2S 3H 9C 9D aD	<One Pair>
+Card to discard? Enter the indices separated by space in a line.
+no <- user input
+
+Player cindy has 3D 6C 6H 9s 10D	<One Pair>
+Card to discard? Enter the indices separated by space in a line.
+no <- user input
+
+Player ano has 2C 2H 5S 5S 10H		<One Pair>
+Card to discard? Enter the indices separated by space in a line.
+5 <- user input
+
+Player adrien has 2S 3H 9C 9D aD	<One Pair>
+Player cindy has 3D 6C 6H 9S 10D	<One Pair>
+Player ano has 2C 2H 3S 5D 5S 		<Two Pairs>
+
+Player ano has 2C 2H 3S 5D 5S 		<Two Pairs>
+Player adrien has 2S 3H 9C 9D aD	<One Pair>
+Player cindy has 3D 6C 6H 9S 10D	<One Pair>
+
+Any player leaving? Enter 'No' for nobody.
+Player's name:
+ano <-user input
+
+Any player leaving? Enter 'No' for nobody.
+Player's name:
+adrien <-user input
+
+Any player leaving? Enter 'No' for nobody.
+Player's name:
+cindy <-user input
+
+Game ends with 0 players.
+
+--------------------------------------
 
 Input 4:
-Card.exe nonexist.txt
+
+C:\Users\xie.z_000\Documents\Visual Studio 2015\Projects\ConsoleApplication4\Deb
+ug>ConsoleApplication4.exe auto1* auto2* auto3* auto4* auto5* auto6* auto7* auto
+9* auto10*
 
 Output 4:
-Program's name: Card.exe
-Error 1: Fail to open the input file. 
 
-Input 5:
-Card.exe a b c
+Player auto1* has 2S  4C  4H  8S  kC     (One Pair)
+Card to discard? Enter the indices separated by space in a line.
 
-Output 5:
-Program's name: Card.exe
-Error 6: More than two command line arguments are given. 
+Player auto2* has 5D  6D  7S  8D  aS     (No Rank)
+Card to discard? Enter the indices separated by space in a line.
 
-Input 6:
-Card.exe card.txt
+Player auto3* has 2D  6C  6H  6S  10H     (Three of a Kind)
+Card to discard? Enter the indices separated by space in a line.
 
-KD Qs 6c AH 9D 7s 4s KH 9c
-JD QH 10s Ks 6D 8c 4H 10H QD
+Player auto4* has 5C  7D  10C  10D  qD     (One Pair)
+Card to discard? Enter the indices separated by space in a line.
 
-Output 6:
-Program's name: Card.exe
-Error 2: There are less than 45 cards in the input file. 
+Player auto5* has 2H  8C  jC  jS  kH     (One Pair)
+Card to discard? Enter the indices separated by space in a line.
 
-Input 7:
-Card.exe card.txt
+Player auto6* has 3H  4D  jD  qH  qS     (One Pair)
+Card to discard? Enter the indices separated by space in a line.
 
-KD Qs 6c AH 9D 7s 4s KH 9c
-JD QH 10s Ks 6D 8c 4H 10H QD
-6s JH 9H Js 5D 2s 4D 3H 10c
-5s Qc 8s AD 8D 5H As 2H 10D
-3c Js 7H Ac 7D 2c 4c 8H 9s
+Player auto7* has 5H  7H  9D  jH  kS     (No Rank)
+Card to discard? Enter the indices separated by space in a line.
 
-Output 7:
-The deck is empty. 
-Hands before sorting
-9C  9S  10C  10D  qD     (Two Pairs)
-2H  3H  8H  10H  kH     (Flush)
-4C  4D  4H  4S  aS     (Four of a Kind)
-2C  2S  5H  7S  8C     (One Pair)
-5D  6D  7D  8D  9D     (Straight Flush)
-jS  kS  aC  aD  aH     (Three of a Kind)
-6C  7H  8S  9H  10S     (Straight)
-jH  jS  qC  qH  qS     (Full House)
-3C  5S  6S  jD  kD     (No Rank)
-Hands after sorting - card order
-2C  2S  5H  7S  8C     (One Pair)
-2H  3H  8H  10H  kH     (Flush)
-3C  5S  6S  jD  kD     (No Rank)
-4C  4D  4H  4S  aS     (Four of a Kind)
-5D  6D  7D  8D  9D     (Straight Flush)
-6C  7H  8S  9H  10S     (Straight)
-9C  9S  10C  10D  qD     (Two Pairs)
-jH  jS  qC  qH  qS     (Full House)
-jS  kS  aC  aD  aH     (Three of a Kind)
-Hands after sorting - poker rank
-5D  6D  7D  8D  9D     (Straight Flush)
-4C  4D  4H  4S  aS     (Four of a Kind)
-jH  jS  qC  qH  qS     (Full House)
-2H  3H  8H  10H  kH     (Flush)
-6C  7H  8S  9H  10S     (Straight)
-jS  kS  aC  aD  aH     (Three of a Kind)
-9C  9S  10C  10D  qD     (Two Pairs)
-2C  2S  5H  7S  8C     (One Pair)
-3C  5S  6S  jD  kD     (No Rank)
+Player auto9* has 3S  7C  9H  qC  aD     (No Rank)
+Card to discard? Enter the indices separated by space in a line.
 
-Input 8:
-Card.exe card.txt -shuffle
-(same input file as Input 7)
+Player auto10* has 3D  5S  9C  10S  aC     (No Rank)
+Card to discard? Enter the indices separated by space in a line.
 
-The deck is empty. 
-Hands before sorting
-3H  4S  7H  qH  aS     (No Rank)
-5S  7D  10S  qD  kS     (No Rank)
-5D  8C  8H  8S  aD     (Three of a Kind)
-3C  4D  5H  9D  10C     (No Rank)
-6C  6D  6S  jD  jS     (Full House)
-7S  9S  jH  qC  qS     (One Pair)
-2S  4H  10H  kH  aH     (No Rank)
-4C  8D  9H  jS  kD     (No Rank)
-2C  2H  9C  10D  aC     (One Pair)
-Hands after sorting - card order
-2C  2H  9C  10D  aC     (One Pair)
-2S  4H  10H  kH  aH     (No Rank)
-3C  4D  5H  9D  10C     (No Rank)
-3H  4S  7H  qH  aS     (No Rank)
-4C  8D  9H  jS  kD     (No Rank)
-5S  7D  10S  qD  kS     (No Rank)
-5D  8C  8H  8S  aD     (Three of a Kind)
-6C  6D  6S  jD  jS     (Full House)
-7S  9S  jH  qC  qS     (One Pair)
-Hands after sorting - poker rank
-6C  6D  6S  jD  jS     (Full House)
-5D  8C  8H  8S  aD     (Three of a Kind)
-7S  9S  jH  qC  qS     (One Pair)
-2C  2H  9C  10D  aC     (One Pair)
-2S  4H  10H  kH  aH     (No Rank)
-3H  4S  7H  qH  aS     (No Rank)
-5S  7D  10S  qD  kS     (No Rank)
-4C  8D  9H  jS  kD     (No Rank)
-3C  4D  5H  9D  10C     (No Rank)
+Player auto1* has 4C  4H  9S  kD  aH     (One Pair)
+Player auto2* has 2C  3C  4S  8H  aS     (No Rank)
+Player auto3* has 5D  6C  6H  6S  10S     (Three of a Kind)
+Player auto4* has 5C  7C  8D  10C  10D     (One Pair)
+Player auto5* has 3D  7D  9C  jC  jS     (One Pair)
+Player auto6* has 3H  9D  jH  qH  qS     (One Pair)
+Player auto7* has 3S  5H  7H  jD  kS     (No Rank)
+Player auto9* has 2D  5S  9H  qC  aD     (No Rank)
+Player auto10* has 2S  7S  qD  kH  aC     (No Rank)
 
-Input 9:
-Card.exe card.txt -shuffle
+Player auto3* has 5D  6C  6H  6S  10S     (Three of a Kind)
+Player auto6* has 3H  9D  jH  qH  qS     (One Pair)
+Player auto5* has 3D  7D  9C  jC  jS     (One Pair)
+Player auto4* has 5C  7C  8D  10C  10D     (One Pair)
+Player auto1* has 4C  4H  9S  kD  aH     (One Pair)
+Player auto10* has 2S  7S  qD  kH  aC     (No Rank)
+Player auto9* has 2D  5S  9H  qC  aD     (No Rank)
+Player auto2* has 2C  3C  4S  8H  aS     (No Rank)
+Player auto7* has 3S  5H  7H  jD  kS     (No Rank)
 
-as 2s 3s 4s 5s 6s 7s 8s 9s 10s js qs ks
-ad 2d 3d 4d 5d 6d 7d 8d 9d 10d jd qd kd
-ah 2h 3h 4h 5h 6h 7h 8h 9h 10h jh qh kh
-ac 2c 3c 4c 5c 6c 7c 8c 9c 10c jc qc kc
+Any player leaving? Enter 'No' for nobody.
+Player's name:
+no
 
-Output 9:
-The deck has 7 cards: 
-3C  aS  4S  2S  aD  
-aH  2D  
-Hands before sorting
-4H  5C  5H  9D  10D     (One Pair)
-3D  5S  7H  jH  qD     (No Rank)
-3S  8C  10S  qS  kC     (No Rank)
-3H  6C  6H  6S  7D     (Three of a Kind)
-4D  8H  8S  jD  qC     (One Pair)
-4C  6D  8D  10C  qH     (No Rank)
-9C  9H  9S  10H  aC     (Three of a Kind)
-7C  7S  jS  kD  kH     (Two Pairs)
-2C  2H  5D  jC  kS     (One Pair)
-Hands after sorting - card order
-2C  2H  5D  jC  kS     (One Pair)
-3D  5S  7H  jH  qD     (No Rank)
-3H  6C  6H  6S  7D     (Three of a Kind)
-3S  8C  10S  qS  kC     (No Rank)
-4H  5C  5H  9D  10D     (One Pair)
-4C  6D  8D  10C  qH     (No Rank)
-4D  8H  8S  jD  qC     (One Pair)
-7C  7S  jS  kD  kH     (Two Pairs)
-9C  9H  9S  10H  aC     (Three of a Kind)
-Hands after sorting - poker rank
-9C  9H  9S  10H  aC     (Three of a Kind)
-3H  6C  6H  6S  7D     (Three of a Kind)
-7C  7S  jS  kD  kH     (Two Pairs)
-4D  8H  8S  jD  qC     (One Pair)
-4H  5C  5H  9D  10D     (One Pair)
-2C  2H  5D  jC  kS     (One Pair)
-3S  8C  10S  qS  kC     (No Rank)
-3D  5S  7H  jH  qD     (No Rank)
-4C  6D  8D  10C  qH     (No Rank)
+Any player joining? Enter 'No' for nobody.
+Player's name:
+no
+
+Game continues with 3 players.
+
+Player auto6* has 4S  7D  8H  9C  aC     (No Rank)
+Card to discard? Enter the indices separated by space in a line.
+
+Player auto10* has 7H  7S  qC  qD  aH     (Two Pairs)
+Card to discard? Enter the indices separated by space in a line.
+
+Player auto7* has 5C  6D  jC  kD  aS     (No Rank)
+Card to discard? Enter the indices separated by space in a line.
+
+Player auto6* has 3D  9S  10S  aC  aD     (One Pair)
+Player auto10* has 3S  7H  7S  qC  qD     (Two Pairs)
+Player auto7* has 2C  5D  kC  kH  aS     (One Pair)
+
+Player auto10* has 3S  7H  7S  qC  qD     (Two Pairs)
+Player auto6* has 3D  9S  10S  aC  aD     (One Pair)
+Player auto7* has 2C  5D  kC  kH  aS     (One Pair)
+
+Any player leaving? Enter 'No' for nobody.
+Player's name:
+no
+
+Any player joining? Enter 'No' for nobody.
+Player's name:
+no
+
+Game ends with 0 players.

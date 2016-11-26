@@ -1,5 +1,5 @@
 /*
-Deck.h created by Cindy Le (lex@wustl.edu)
+Deck.h created by Cindy Le, Adrien Xie, and Yanni Yang
 */
 
 #pragma once
@@ -7,10 +7,9 @@ Deck.h created by Cindy Le (lex@wustl.edu)
 #ifndef DECK_H_
 #define DECK_H_
 
-#include "stdafx.h"
+//#include "stdafx.h"
 #include "Card.h"
 #include "Hand.h"
-#include "lab.h"
 
 #include <vector>
 #include <string>
@@ -27,23 +26,23 @@ Deck.h created by Cindy Le (lex@wustl.edu)
 using namespace std;
 class Hand;
 
-class Deck
-{
-public:
-	Deck(const char* &filename);
-	~Deck();
+class Deck{
+	public:
+		Deck();
+		~Deck();
 
-	vector<Card> getCards() const;
-	Card popCard();
-	void shuffle();
-	int size() const;
-	string toString() const;
+		vector<Card> getCards() const;
+		Card popCard();
+		void shuffle();
+		void addCard(Card& c);
+		void standardized();
+		int size() const;
+		string toString() const;
 
-private:
-	int load(const char* &filename);
-	vector<Card> cards;
-	CardSuit convertSuit(const char& input);
-	CardRank convertRank(const char& input);
+	private:
+		vector<Card> cards;
+		CardSuit convertSuit(const char& input);
+		CardRank convertRank(const char& input);
 
 };
 

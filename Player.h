@@ -28,7 +28,7 @@ struct Player {
 	unsigned int won;
 	unsigned int lost;
 	bool isAuto;
-	std::map<std::string, std::string>_obj;;
+	
 
 	Player(char* filename);
 	unsigned int chips;

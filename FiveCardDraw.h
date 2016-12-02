@@ -21,22 +21,33 @@ FiveCardDraw.h created by Cindy Le, Adrien Xie, and Yanni Yang
 using namespace std;
 
 class FiveCardDraw : public Game {
-		void autoPlayerLeave();
-		vector<int> FiveCardDraw::findAuto();
-		//void autoDiscard();
-		//void discard(int handRank);
-	public:
-		FiveCardDraw();
-		virtual int before_turn(Player& p);
-	    virtual int turn(Player& p);
-		virtual int after_turn(Player& p);
-		virtual int before_round();
-		virtual int round();
-		virtual int after_round();
-		
-	protected:
-		size_t dealer;
-		Deck discardDeck;
+
+private:
+	int handCards = 5;
+	int fold = 0;
+	//void autoPlayerLeave();
+	//vector<int> FiveCardDraw::findAuto();
+	unsigned int ante;
+	unsigned int bet;
+	int pot = 0;
+
+	//void autoDiscard();
+	//void discard(int handRank);
+public:
+	FiveCardDraw();
+	virtual int before_turn(Player& p);
+	virtual int turn(Player& p);
+	virtual int after_turn(Player& p);
+	virtual void betting_phase(Player& p);
+	virtual int before_round();
+	virtual int round();
+	virtual int after_round();
+
+protected:
+	size_t dealer;
+	Deck discardDeck;
+	unsigned int high_cum_bet;
 };
 
 #endif  //FiveCardDraw_H_
+

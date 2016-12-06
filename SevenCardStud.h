@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 #include "stdafx.h"
+#include "PokerGame.h"
 
 
 using namespace std;
@@ -17,21 +18,19 @@ class SevenCardStud : public Game {
 
 public:
 	SevenCardStud();
-	
+	int first_turn(Player& p);
+	int middle_turn(Player& p);
+	int last_turn(Player& p);
+	int round();
+
+
+	virtual int before_turn(Player& p);
 	virtual int turn(Player& p);
-	virtual int middle_turn(Player& p);
-	virtual int last_turn(Player& p);
 	virtual int after_turn(Player& p);
-	virtual void betting_phase(Player& p);
 	virtual int before_round();
 	virtual int round();
 	virtual int after_round();
-	virtual void bet_phase(Player& p);
-		
-
-
-
-
+	enum
 
 
 };
